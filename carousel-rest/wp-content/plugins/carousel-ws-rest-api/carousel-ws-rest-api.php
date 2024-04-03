@@ -8,6 +8,14 @@ Version: 1.0
 Author: Gianluca Antolini
 */
 
+
+/*
+TODO:
+- change db table -> img is now link (can also be a video)
+                  -> title_eng and title_ita, description_eng and description_ita
+- add language parameter to the request
+- add error handling
+*/
 /**
  * Get slides data from database and return them as JSON
  *
