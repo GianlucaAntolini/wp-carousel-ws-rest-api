@@ -66,25 +66,32 @@ function get_slides( $data ) {
   // Get the slides from the database
   $slides = get_posts( array(
     'post_type' => 'slides',
-    'posts_per_page' => 3,
   ) );
+
+  // Prepare slides data for the response
+  $slides_data = array(
+    'status' => 'success',
+    'data' => array()
+  );
 
 
   if ( empty( $slides )  ) {
-    return new WP_Error( 'no_slides', 'Invalid slides', array( 'status' => 404 ) );
+    // If there are no slides, set the status to error and add a errorMessage 
+    $slides_data['status'] = 'error';
+    $slides_data['errorMessage'] = 'No slides found';
+    return $slides_data;
   }
 
-  $slides_data = array();
-
   foreach($slides as $slide){
-    $slides_data[] = array(
+    $description = $slide->post_content;
+    $slides_data['data'][] = array(
       'title' => $slide->post_title,
-      'description' => $slide->post_content,
+      'description' => $description,
       'img' => get_the_post_thumbnail_url($slide->ID)
     );
   }
 
-  return json_encode($slides_data);
+  return $slides_data;
 }
 
 /*http://localhost/wp-json/carousel-ws-rest-api/v1/slides*/
