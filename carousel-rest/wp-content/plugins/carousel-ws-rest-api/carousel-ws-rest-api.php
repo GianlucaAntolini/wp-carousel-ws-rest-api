@@ -12,7 +12,7 @@ Author: Gianluca Antolini
 // a slide has a title, description and image/video
 function create_slides_post_type() {
 
-  // labels
+    // labels
     $labels = array(
         'name'                => _x( 'Slides', 'Post Type General Name', 'carousel-ws-rest-api' ),
         'singular_name'       => _x( 'Slide', 'Post Type Singular Name', 'carousel-ws-rest-api' ),
@@ -29,8 +29,7 @@ function create_slides_post_type() {
         'not_found_in_trash'  => __( 'Non trovata nel cestino', 'carousel-ws-rest-api' ),
     );
       
-// Set other options for Custom Post Type
-      
+    // options
     $args = array(
         'label'               => __( 'slides', 'carousel-ws-rest-api' ),
         'description'         => __( 'Slides for js carousel', 'carousel-ws-rest-api' ),
@@ -47,12 +46,12 @@ function create_slides_post_type() {
         'exclude_from_search' => false,
         'publicly_queryable'  => true,
         'capability_type'     => 'post',
-        'show_in_rest' => true,
+        'show_in_rest' => false,
         'rewrite' => array('slug' => 'slides'),
   
     );
       
-    // Registering your Custom Post Type
+    // registering the custom post type
     register_post_type( 'slides', $args );
 
 }
@@ -82,14 +81,21 @@ function get_slides( $data ) {
     return $slides_data;
   }
 
+  // Loop througth the slides and add the data to the response (title, description, author, date, img)
   foreach($slides as $slide){
     $description = $slide->post_content;
+
+    //remove all backslashes from the img_url inside array
     $slides_data['data'][] = array(
       'title' => $slide->post_title,
       'description' => $description,
-      'img' => get_the_post_thumbnail_url($slide->ID)
+      'author' => get_the_author_meta('display_name', $slide->post_author),
+      'date' => $slide->post_date,
+      'img' => wp_get_attachment_url( get_post_thumbnail_id($slide->ID), 'full')
     );
   }
+
+  
 
   return $slides_data;
 }
