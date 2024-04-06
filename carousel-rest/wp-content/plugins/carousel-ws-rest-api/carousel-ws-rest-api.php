@@ -50,9 +50,10 @@ function create_slides_post_type() {
         'rewrite' => array('slug' => 'slides'),
   
     );
-      
+
     // registering the custom post type
     register_post_type( 'slides', $args );
+
 
 }
 
@@ -67,15 +68,19 @@ function get_slides( $data ) {
     'post_type' => 'slides',
   ) );
 
+  // Remove all slides that don't have a thumbnail
+  $slides = array_filter($slides, function($slide){
+    return has_post_thumbnail($slide->ID);
+  });
+
   // Prepare slides data for the response
   $slides_data = array(
     'status' => 'success',
     'data' => array()
   );
 
-
+  // If there are no slides, set the status to error and add a errorMessage 
   if ( empty( $slides )  ) {
-    // If there are no slides, set the status to error and add a errorMessage 
     $slides_data['status'] = 'error';
     $slides_data['errorMessage'] = 'No slides found';
     return $slides_data;
