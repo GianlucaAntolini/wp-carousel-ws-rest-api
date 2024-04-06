@@ -9,10 +9,10 @@ Author: Gianluca Antolini
 */
 
 // Function to register the custom post type "slides"
-// a slide has a title, description and image/video
+// A slide has a title, description, image/video thumbnail, author and date
 function create_slides_post_type() {
 
-    // labels
+    // Labels
     $labels = array(
         'name'                => _x( 'Slides', 'Post Type General Name', 'carousel-ws-rest-api' ),
         'singular_name'       => _x( 'Slide', 'Post Type Singular Name', 'carousel-ws-rest-api' ),
@@ -29,7 +29,7 @@ function create_slides_post_type() {
         'not_found_in_trash'  => __( 'Non trovata nel cestino', 'carousel-ws-rest-api' ),
     );
       
-    // options
+    // Options
     $args = array(
         'label'               => __( 'slides', 'carousel-ws-rest-api' ),
         'description'         => __( 'Slides for js carousel', 'carousel-ws-rest-api' ),
@@ -51,27 +51,37 @@ function create_slides_post_type() {
   
     );
 
-    // registering the custom post type
+    // Register the custom post type
     register_post_type( 'slides', $args );
-
-
 }
 
+// Register the custom post type on the 'init' hook
 add_action( 'init', 'create_slides_post_type' );
-
 
 
 // Function to get the slides data in JSON format
 function get_slides( $data ) {
-  // Get the slides from the database
+
+  // Get the language parameter from the request, default to 'it'
+  $language = isset( $data['lang'] ) && in_array( $data['lang'], array( 'it', 'en' ) ) ? $data['lang'] : 'it';
+
+  // Get the slides from the database, posts_per_page = -1 to get all the slides
   $slides = get_posts( array(
     'post_type' => 'slides',
+    'posts_per_page' => -1,
   ) );
 
-  // Remove all slides that don't have a thumbnail
+  // Remove all slides that don't have a thumbnail or a title or a description
   $slides = array_filter($slides, function($slide){
-    return has_post_thumbnail($slide->ID);
+    return has_post_thumbnail($slide->ID) && !empty($slide->post_title) && !empty($slide->post_content);
   });
+
+  // Filter slides based on language using Polylang
+  if( function_exists('pll_get_post_language')){
+    $slides = array_filter($slides, function($slide) use ($language){
+      return pll_get_post_language($slide->ID) === $language;
+    });
+  }
 
   // Prepare slides data for the response
   $slides_data = array(
@@ -86,36 +96,38 @@ function get_slides( $data ) {
     return $slides_data;
   }
 
-  // Loop througth the slides and add the data to the response (title, description, author, date, img)
+  // Loop through the slides and add the data to the response (title, description, author, date, img)
   foreach($slides as $slide){
-    $description = $slide->post_content;
 
-    //remove all backslashes from the img_url inside array
     $slides_data['data'][] = array(
       'title' => $slide->post_title,
-      'description' => $description,
+      'description' =>  $slide->post_content,
       'author' => get_the_author_meta('display_name', $slide->post_author),
       'date' => $slide->post_date,
       'img' => wp_get_attachment_url( get_post_thumbnail_id($slide->ID), 'full')
     );
   }
 
-  
-
   return $slides_data;
 }
 
+// Example of the REST API endpoint
 /*http://localhost/wp-json/carousel-ws-rest-api/v1/slides*/
+// Example of the REST API endpoint with language parameter
+/*http://localhost/wp-json/carousel-ws-rest-api/v1/slides?lang=en*/
 
-
-// Register the rest route
+// Register the rest route with language parameter
 add_action( 'rest_api_init', function () {
   register_rest_route( 'carousel-ws-rest-api/v1', '/slides', array(
     'methods' => 'GET',
-    'callback' => 'get_slides'
+    'callback' => 'get_slides',
+    'args' => array(
+      'lang' => array(
+        'default' => 'it',
+        'sanitize_callback' => 'sanitize_text_field',
+      ),
+    ),
   ) );
 } );
-
-
 
 ?>
