@@ -43,7 +43,7 @@ Esempio di dati di ritorno:
    ]
 }
 ```
-Esempio di dati di ritorno in caso di errore (nessuna slide trovata):
+Esempio di dati di ritorno in caso di errore (nessuna 'slide' trovata):
 ```json
 {
    "status": "error",
@@ -56,9 +56,9 @@ Esempio di dati di ritorno in caso di errore (nessuna slide trovata):
 
 
 È possibile gestire la traduzione dei campi testuali da Italiano a Inglese. Per fare ciò è necessario installare il plugin wordpress [Polylang](https://polylang.pro), settare
-come lingua di default Italiano ('it') e aggiungere la lingua Inglese ('en'). Per ogni 'slides' sarà quindi possibile creare la versione in Italiano e quella in Inglese.
+come lingua di default Italiano ('it') e aggiungere la lingua Inglese ('en'). Per ogni 'slide' sarà quindi possibile creare la versione in Italiano e quella in Inglese.
 Aggiungendo al link dell'endpoint il parametro 'lang' è possibile scegliere di scaricare i dati delle 'slides' in inglese o di quelle in italiano. Di default vengono ritornate
-le slides in italiano (quindi anche se non viene inserito il parametro o se viene inserito un valore non corretto).
+le 'slides' in italiano (quindi anche se non viene inserito il parametro o se viene inserito un valore non corretto).
 
 Esempio di link per raggiungere l'endpoint e ricevere i dati delle 'slides' in inglese: http://localhost/wp-json/carousel-ws-rest-api/v1/slides?lang=en
 
